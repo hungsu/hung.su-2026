@@ -7,6 +7,11 @@
 :root {
 	--accent: #2337ff;
 	--accent-dark: #000d8a;
+	--layout-columns:
+		[full-start] minmax(1rem, 1fr)
+		[content-start] minmax(0, 60ch)
+		[content-end] minmax(1rem, 1fr)
+		[full-end];
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
 	--gray-light: 229, 233, 240;
@@ -22,6 +27,8 @@ body {
 	font-style: normal;
 	margin: 0;
 	padding: 0;
+	display: grid;
+	grid-template-columns: var(--layout-columns);
 	text-align: left;
 	background: linear-gradient(var(--gray-gradient)) no-repeat;
 	background-size: 100% 600px;
@@ -31,11 +38,27 @@ body {
 	font-size: 20px;
 	line-height: 1.7;
 }
+body > * {
+	grid-column: full-start / full-end;
+	display: grid;
+	grid-template-columns: var(--layout-columns);
+}
+body > * > * {
+	grid-column: content-start / content-end;
+}
 main {
-	width: 720px;
-	max-width: calc(100% - 2em);
-	margin: auto;
-	padding: 3em 1em;
+	margin: 0;
+	padding: 0;
+}
+.full-bleed {
+	grid-column: 1 / -1;
+	margin: 0;
+}
+.full-bleed img {
+	width: 100%;
+	max-width: none;
+	border-radius: 0;
+	display: block;
 }
 h1,
 h2,
