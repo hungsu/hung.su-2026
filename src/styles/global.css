@@ -9,8 +9,10 @@
 	--accent-dark: #000d8a;
 	--layout-columns:
 		[full-start] minmax(1rem, 1fr)
+		[wide-start] minmax(0, 15ch)
 		[content-start] minmax(0, 60ch)
-		[content-end] minmax(1rem, 1fr)
+		[content-end] minmax(0, 15ch)
+		[wide-end] minmax(1rem, 1fr)
 		[full-end];
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
@@ -55,6 +57,16 @@ main {
 	margin: 0;
 }
 .full-bleed img {
+	width: 100%;
+	max-width: none;
+	border-radius: 0;
+	display: block;
+}
+.wide {
+	grid-column: wide-start / wide-end;
+	margin: 0;
+}
+.wide img {
 	width: 100%;
 	max-width: none;
 	border-radius: 0;
@@ -146,7 +158,10 @@ hr {
 		font-size: 18px;
 	}
 	main {
-		padding: 1em;
+		padding: 1.5em 0;
+	}
+	.wide {
+		grid-column: 1 / -1;
 	}
 }
 
