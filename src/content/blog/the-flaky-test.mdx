@@ -1,0 +1,240 @@
+---
+title: "CSS flexbox caused a stable test to fail 75% of the time (and every engineer didn't believe me)"
+description: "A week of toil, an overheating laptop, heated debate with a senior principal engineer, then a solved flaky test."
+pubDate: 'April 26 2026'
+heroImage: '../../assets/blog-placeholder-3.jpg'
+---
+
+## The problem
+
+A Playwright test started failing intermittently. Not occasionally — **75% of the time** under load. The test would:
+
+1. Click a "Save" button in a modal
+2. Expect a validation error message to appear
+3. Fail because the error never appeared
+
+The kicker? The test had been rock-solid for months, then suddenly became flaky after a seemingly innocent CSS optimization.
+
+```
+Running 12 tests using 8 workers:
+  3 passed ✓
+  9 failed ✗
+```
+
+## The investigation begins
+
+Git bisection pointed to commit `e4762d286e7` - a CSS change that replaced transform-based modal centering with flexbox centering for "contrast and close button fuzziness fixes." The diff looked harmless:
+
+<div class="wide">
+
+```diff
+- <div className="tw:fixed tw:inset-0 ...">
++ <div className="tw:fixed tw:inset-0 tw:flex tw:justify-center tw:items-start ...">
+   <DialogPrimitive.Content
+     className="tw:grid tw:gap-4 ...
+-      tw:fixed tw:left-[50%] tw:top-0 tw:my-6 tw:translate-x-[-50%] tw:z-[1]"
++      tw:w-full tw:pointer-events-auto tw:relative tw:z-[1]"
+```
+
+</div>
+
+CSS transform out, flexbox in. Both center the modal. What could go wrong?
+
+## The first engineer interjection
+
+**Engineer 1:** "Can we just fix the tests? Adding a small timeout should handle any layout issues."
+
+We tried. Added `waitForInteractive()` with various delays:
+- 100ms wait: **4/12 passed (33%)**
+- 200ms wait: **4/12 passed (33%)**
+- 500ms wait: **3/12 passed (25%)** — *even worse!*
+
+**The timeouts made it worse.** Something fundamentally different was happening.
+
+## Going deeper: what does `.click()` actually do?
+
+We needed to understand Playwright's click mechanics:
+
+1. **Get element reference** → `saveButton` locator
+2. **Wait for actionability** → visible, stable, enabled, not obscured
+3. **Get bounding box** → `{ x: 912, y: 794, width: 100, height: 30 }`
+4. **Calculate center point** → `(962, 809)`
+5. **Dispatch pointer event** at those coordinates
+
+The button was actionable. The coordinates were mathematically correct. So why was the click missing?
+
+## The second engineer interjection
+
+**Engineer 2:** "I'm skeptical this is a race condition. Playwright waits at least 30 seconds for things to settle according to our timeouts. If it's not timing out, there's no race."
+
+Valid point. But then we added instrumentation to the test:
+
+<div class="wide">
+
+```typescript
+// Before click
+const boxBefore = await saveButton.boundingBox();
+console.log('Button position BEFORE click:', boxBefore);
+
+const clickX = boxBefore.x + boxBefore.width / 2;
+const clickY = boxBefore.y + boxBefore.height / 2;
+
+await saveButton.click();
+
+// After click - check what actually received the click
+const elementAtClick = await page.evaluate(([x, y]) => {
+  const element = document.elementFromPoint(x, y);
+  return {
+    tagName: element?.tagName,
+    fullClassName: element?.getAttribute('class'),
+    dataTestId: element?.getAttribute('data-testid'),
+    isButton: element?.getAttribute('data-testid') === 'submitButton'
+  };
+}, [clickX, clickY]);
+
+console.log('Element at click coordinates:', elementAtClick);
+```
+
+</div>
+
+## The smoking gun
+
+The logs revealed everything:
+
+<div class="wide">
+
+```
+Button position BEFORE click: { x: 912, y: 794, width: 100, height: 30 }
+Click coordinates: (962, 809) ← mathematically correct ✓
+Button position AFTER click: { x: 912, y: 794, width: 100, height: 30 }
+Button movement: 0px ← stable, not moving
+
+Element at click coordinates: {
+  tagName: 'DIV',
+  fullClassName: 'tw:flex tw:justify-end',
+  dataTestId: null,
+  isButton: false  ← NOT THE BUTTON
+}
+```
+
+</div>
+
+**The parent DIV was intercepting the click.**
+
+Looking at the modal structure:
+
+<div class="wide">
+
+```tsx
+<div className="modal-footer tw:px-6 tw:py-4">
+  <div className="tw:flex tw:w-full tw:justify-between" data-testid="modalFooter">
+    <div className="tw:flex tw:justify-end">  ← THIS DIV
+      <Button testId="cancelButton">Cancel</Button>
+      <Button testId="submitButton">Save</Button>  ← Target button
+    </div>
+  </div>
+</div>
+```
+
+</div>
+
+The flex container (`tw:flex tw:justify-end`) was physically overlaying its own child button during layout.
+
+## The third engineer interjection
+
+**Engineer 3:** "Our CI doesn't have GPUs. If this fix relies on GPU acceleration, it'll still be flaky there."
+
+This needed clarification. "GPU acceleration" in CSS is misleading:
+
+- **Flexbox centering:** Runs on the main thread. Browser calculates flex container positions, child positions, distributes space — all synchronously during layout.
+
+- **Transform centering:** Creates a compositor layer. The browser can handle positioning off the main thread using software rendering (no GPU required). It worked for years in the same CI environment before the flexbox change.
+
+The GPU comment was a red herring. The real issue was **stacking context and layout timing**.
+
+## Why it fails under load
+
+With flexbox centering:
+- 1 worker (light load): Layout completes before click → Pass ✓
+- 8 workers (heavy load): Layout still processing → DIV intercepts click → Fail ✗
+
+When the browser is under load, flexbox layout calculation takes longer. During this window:
+1. Playwright verifies button is actionable (it is)
+2. Playwright calculates click coordinates (correct)
+3. Playwright dispatches click
+4. Browser's `elementFromPoint(962, 809)` returns... **the parent DIV**
+
+The flex container hasn't finished laying out its children. It temporarily overlays the button in the stacking context. The click hits the DIV instead of the button. The button's `onClick` never fires. No validation error appears. Test fails.
+
+## This isn't event bubbling
+
+A common misconception: "Won't the click bubble from the DIV to the button?"
+
+No. Event bubbling only happens **after** an element receives an event. The flow is:
+
+1. Browser hit-tests: "What element is at (x, y)?"
+2. That element receives the click event
+3. Event bubbles up through parents
+
+Our button never received the event because it lost the hit test. The DIV intercepted it at step 1.
+
+## The solution
+
+Revert to transform-based centering:
+
+<div class="wide">
+
+```tsx
+<div className="tw:fixed tw:inset-0 tw:z-[1010] tw:overflow-y-auto tw:py-6">
+  <div className="tw:absolute tw:w-full tw:h-full tw:opacity-50 tw:bg-sq-dark-background" />
+  <DialogPrimitive.Content
+    className="tw:grid tw:gap-4 tw:border tw:bg-white ...
+      tw:fixed tw:left-[50%] tw:top-0 tw:my-6 tw:translate-x-[-50%]
+      tw:max-w-[calc(100%-2rem)] tw:z-[1]"
+    {...props}>
+```
+
+</div>
+
+Key changes:
+- Remove flexbox from wrapper (no `tw:flex tw:justify-center tw:items-start`)
+- Position content with `left-[50%] translate-x-[-50%]` instead
+- Add `max-w-[calc(100%-2rem)]` to prevent edge collision
+
+## Verification
+
+Running the test 12 times under maximum load (8 workers):
+
+```
+Running 12 tests using 8 workers
+
+  12 passed (1.2m)  ← 100% pass rate
+```
+
+No flex container = nothing to intercept clicks = no race condition.
+
+## Lessons learned
+
+1. **CSS changes can cause behavioral bugs**, not just visual ones. Layout timing affects JavaScript execution.
+
+2. **"Performance optimizations" need scrutiny.** The flexbox → transform change was meant to improve performance but introduced a race condition that only manifested under load.
+
+3. **Instrumentation is king.** Without `elementFromPoint()` logging, we'd still be arguing about timeouts. Definitive evidence trumps intuition.
+
+4. **Playwright's actionability checks aren't foolproof.** A button can be visible, stable, enabled, and have a valid bounding box — yet still miss clicks due to stacking context issues.
+
+5. **Test-side fixes don't always work.** When arbitrary timeouts make things *worse*, that's a signal the problem is structural, not timing-related.
+
+6. **Screenshots tell half the story.** The CI failure screenshot showed "no modal," making it look like a timing issue. The real failure happened *during* the click — the modal closed because the click hit the wrong element.
+
+## The final engineer response
+
+After seeing the `elementFromPoint()` logs:
+
+**Engineer:** "Okay, you're right. It IS a race condition, but not the 'waiting for ready' kind. The race is between click dispatch and the flex container's stacking context resolving. The flex container is intercepting its own children. This specific issue is eliminated because the flex container no longer exists."
+
+✓ **Merged.**
+
+---
+
+**Takeaway:** Sometimes the most innocuous CSS changes have the weirdest consequences. When tests fail intermittently after a "harmless" style tweak, don't assume it's unrelated — dig deeper. The answer might be lurking in `document.elementFromPoint()`.
