@@ -165,14 +165,16 @@ hr {
 	border-top: 1px solid rgb(var(--gray-light));
 }
 @media (max-width: 720px) {
-	body {
-		font-size: 18px;
+	:root {
+		--layout-columns:
+			[full-start] 1rem
+			[wide-start content-start] 1fr
+			[content-end wide-end] 1rem
+			[full-end];
 	}
 	main {
 		padding: 1.5em 0;
 	}
-	.wide {
-		grid-column: 1 / -1;
 	}
 }
 
