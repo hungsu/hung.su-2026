@@ -32,6 +32,14 @@
 	--box-shadow:
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
 		0 16px 32px rgba(var(--gray), 33%);
+
+	/* Fluid type scale: 320px→1240px viewport, 18px→20px base, ratio 1.2→1.25 */
+	--step-0: clamp(1.125rem, calc(1.082rem + 0.217vw), 1.25rem);
+	--step-1: clamp(1.35rem,  calc(1.276rem + 0.370vw), 1.563rem);
+	--step-2: clamp(1.62rem,  calc(1.504rem + 0.579vw), 1.953rem);
+	--step-3: clamp(1.944rem, calc(1.771rem + 0.865vw), 2.441rem);
+	--step-4: clamp(2.333rem, calc(2.082rem + 1.250vw), 3.052rem);
+	--step-5: clamp(2.799rem, calc(2.446rem + 1.766vw), 3.815rem);
 }
 body {
 	font-family: "Alegreya Sans", sans-serif;
@@ -46,7 +54,7 @@ body {
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	color: var(--foreground-dark);
-	font-size: 20px;
+	font-size: var(--step-0);
 	line-height: 1.7;
 }
 body > * {
@@ -91,21 +99,11 @@ h6 {
 	color: rgb(var(--black));
 	line-height: 1.2;
 }
-h1 {
-	font-size: 3.052em;
-}
-h2 {
-	font-size: 2.441em;
-}
-h3 {
-	font-size: 1.953em;
-}
-h4 {
-	font-size: 1.563em;
-}
-h5 {
-	font-size: 1.25em;
-}
+h1 { font-size: var(--step-5); }
+h2 { font-size: var(--step-4); }
+h3 { font-size: var(--step-3); }
+h4 { font-size: var(--step-2); }
+h5 { font-size: var(--step-1); }
 strong,
 b {
 	font-weight: 700;
@@ -143,6 +141,8 @@ img {
 	border-radius: 8px;
 }
 code {
+	font-family: monospace;
+	font-size: 0.8em;
 	padding: 2px 5px;
 	background-color: rgb(var(--gray-light));
 	border-radius: 2px;
@@ -175,7 +175,10 @@ hr {
 	main {
 		padding: 1.5em 0;
 	}
-	}
+}
+
+.astro-code {
+	font-size: 0.6em;
 }
 
 .sr-only {
