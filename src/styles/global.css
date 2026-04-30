@@ -168,7 +168,7 @@ hr {
 	:root {
 		--layout-columns:
 			[full-start] 1rem
-			[wide-start content-start] 1fr
+			[wide-start content-start] minmax(0, 1fr)
 			[content-end wide-end] 1rem
 			[full-end];
 	}
