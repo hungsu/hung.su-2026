@@ -1,0 +1,61 @@
+# Repo guide for agents
+
+Personal static site for **hung.su**, built with Astro 6 and deployed to
+Cloudflare (Workers static assets). Hung-Su hands agents loose ideas; agents
+implement them and open a PR with a live preview link for him to review and
+merge.
+
+## How we work
+
+- **Run with the idea.** Implement features, redesigns, new pages, components,
+  posts — whatever the idea calls for. There is no file you are forbidden to
+  touch. Creativity is welcome.
+- **The PR is the gate, not a limit on your creativity.** Every change lands via
+  a pull request. Hung-Su reviews each PR through its Cloudflare **preview link**
+  and merges it himself — often from a phone, anywhere in the world. Nothing you
+  do reaches the live site until he clicks merge.
+- **One idea = one PR.** Each PR gets its own isolated preview deploy, so keep
+  them focused and independently reviewable.
+
+## Non-negotiables
+
+1. **Never push to `main` or merge a PR.** Open the PR and stop. (`main` is
+   branch-protected, so this is enforced — but don't try to work around it.)
+2. **Keep the build green.** Run `npm run build` before opening a PR. If the
+   build fails, the Cloudflare preview never deploys — and a PR with no preview
+   link is useless for review. The required `Workers Builds: hungsu-2026` check
+   blocks merge while it's red.
+3. **Write a PR description that says what to look at and how to verify it** —
+   e.g. "toggle the new dark-mode switch in the header." Hung-Su reviews via the
+   preview link, so tell him exactly where to click.
+
+## Branch / PR conventions
+
+- Branch names: `feat/<slug>`, `fix/<slug>`, or `post/<slug>`.
+- Open the PR with `gh pr create`, a clear title, and a body following the
+  "what to look at" rule above.
+
+## Project reference
+
+- **Blog posts** live in `src/content/blog/*.md` (use `.mdx` only when you need
+  to embed components). Frontmatter is schema-checked in
+  `src/content.config.ts`:
+  - required: `title`, `description`, `pubDate`
+  - optional: `updatedDate`, `heroImage` (a relative path into `src/assets/`)
+  - A frontmatter mistake fails the build, so it'll be caught before merge.
+- **Site config:** `src/consts.ts` (site title/description) and
+  `astro.config.mjs` (`site` is `https://hung.su`).
+- **Deploy:** the site ships as **static assets** via `wrangler.jsonc` — no SSR.
+  Do **not** re-add the `@astrojs/cloudflare` adapter unless a feature genuinely
+  needs server rendering: it enables Astro Sessions + KV auto-provisioning,
+  which previously broke every deploy. If you change `wrangler.jsonc`,
+  `astro.config.mjs`, `package.json`, or `.github/`, call it out prominently in
+  the PR description — those affect build/deploy.
+
+## Local commands
+
+| Command         | Action                                            |
+| --------------- | ------------------------------------------------- |
+| `npm install`   | Install dependencies                              |
+| `npm run build` | Build + type/frontmatter check (run before a PR)  |
+| `npm run dev`   | Local dev server                                  |
