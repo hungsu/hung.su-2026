@@ -35,6 +35,21 @@ merge.
 - Open the PR with `gh pr create`, a clear title, and a body following the
   "what to look at" rule above.
 
+## Authentication — act as the bot, never as Hung-Su
+
+Agent work is attributed to the **`hungsu-bot`** GitHub account, not to Hung-Su.
+The repo's local git commit identity is already set to the bot, so commits are
+attributed correctly. For anything that talks to GitHub (push, PR), authenticate
+with the bot's token so the PR is opened by the bot:
+
+```sh
+GH_TOKEN="$(cat ~/.config/hungsu-bot.token)" git push -u origin <branch>
+GH_TOKEN="$(cat ~/.config/hungsu-bot.token)" gh pr create --title "..." --body "..."
+```
+
+`main` requires one approving review, which the bot **cannot** give its own PR.
+So opening the PR is the end of your job — Hung-Su approves and merges.
+
 ## Project reference
 
 - **Blog posts** live in `src/content/blog/*.md` (use `.mdx` only when you need
