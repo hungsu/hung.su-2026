@@ -1,0 +1,122 @@
+---
+title: "My Experience with Ubuntu in 2020"
+description: "A year of daily-driving Ubuntu on a ThinkPad — what worked, what broke, and why I eventually switched back."
+pubDate: '2024-03-15'
+updatedDate: '2024-03-15'
+heroImage: '../../assets/blog-placeholder-4.jpg'
+tags: ['linux', 'ubuntu', 'operating-systems', 'thinkpad']
+---
+
+In early 2020, I decided to try Ubuntu as my daily driver on a ThinkPad X1 Carbon (7th gen). I'd used Linux on servers for years but never committed to it on a laptop. Here's what happened over 12 months.
+
+## Why Ubuntu?
+
+- **Hardware support**: ThinkPads have excellent Linux compatibility
+- **LTS stability**: Ubuntu 20.04 LTS promised 5 years of support
+- **Software availability**: Most dev tools have first-class Linux support
+- **Curiosity**: Wanted to understand the modern Linux desktop experience
+
+## The Setup
+
+| Component | Spec |
+|-----------|------|
+| Laptop | ThinkPad X1 Carbon Gen 7 (i7-8665U, 16GB RAM, 512GB NVMe) |
+| OS | Ubuntu 20.04 LTS → 22.04 LTS (upgraded mid-year) |
+| Desktop | GNOME 3.36 → 42 |
+| Kernel | 5.4 → 5.15 (HWE) |
+
+## What Worked Well
+
+### Developer Experience
+- **Terminal-first workflow**: `apt`, `snap`, `flatpak` — package management just works
+- **WSL2 interop**: Seamless Windows VM when needed (rare)
+- **Docker/Podman**: Native performance, no VM overhead
+- **VS Code / JetBrains**: First-class Linux support
+
+### Hardware Integration
+- **TrackPoint + Trackpad**: Both worked out of the box
+- **Fingerprint reader**: `fprintd` + PAM worked after one config tweak
+- **Thunderbolt 3**: Hot-plug monitors, eGPU (mostly)
+- **Sleep/wake**: Reliable after kernel 5.10+
+
+### GNOME Surprises
+- **Workspaces**: Dynamic workspaces changed how I organise windows
+- **Gesture support**: 3-finger swipe for workspace switching — buttery smooth
+- **Extensions ecosystem**: Dash to Panel, Blur My Shell, Cafeine — highly customisable
+
+## What Broke / Frustrated Me
+
+### Audio Stack (PipeWire Transition)
+| Issue | Duration | Resolution |
+|-------|----------|------------|
+| Bluetooth headphones disconnect on wake | 3 months | PipeWire 0.3.30+ fixed it |
+| Microphone not detected in Zoom/Teams | 2 months | `wireplumber` config + kernel update |
+| System sounds crackle under load | Ongoing | Never fully resolved on 20.04 |
+
+### Fractional Scaling
+- 150% scaling on 14" 1080p = blurry X11 apps
+- Wayland + fractional scaling improved in 22.04 but Electron apps still inconsistent
+- Ended up at 100% with larger font sizes — wasted screen real estate
+
+### Thunderbolt Dock Reliability
+| Dock | Monitors | Power Delivery | Issues |
+|------|----------|----------------|--------|
+| Lenovo Thunderbolt 3 Dock Gen 2 | 2×4K@60Hz | ✅ 65W | Random disconnects, requires reboot |
+| CalDigit TS3 Plus | 2×4K@60Hz | ✅ 87W | Rock solid (macOS), flaky on Linux |
+| Dell WD19TBS | 2×4K@60Hz | ✅ 90W | Best Linux compatibility |
+
+### Snap Controversy
+- Forced migration of Firefox, Chromium to Snap
+- Cold start penalties: Firefox 3-5s vs 1s (deb)
+- `snap refresh` blocking updates during work
+- Eventually: `apt hold firefox` + Mozilla PPA
+
+## The "Death by a Thousand Cuts" Moments
+
+1. **Kernel update broke WiFi** (Intel AX200) — 2 hours debugging `iwlwifi` firmware
+2. **GNOME Shell memory leak** — 4GB+ after 3 days uptime, fixed in 42.2
+3. **Nvidia prime offload** — never worked reliably for eGPU (switched to AMD)
+4. **Color management** — no system-wide ICC profile support for my monitor
+5. **HDR** — non-existent on Linux in 2020-2021
+
+## Pros / Cons Summary
+
+### Pros
+✅ Incredible dev environment — containers, tooling, scripting  
+✅ Total control over the system — no forced updates, telemetry  
+✅ Package management superiority (`apt install <anything>`)  
+✅ ThinkPad hardware support is genuinely excellent  
+✅ GNOME workflow (once customised) beats Windows/macOS for keyboard-centric work  
+✅ Battery life: 8-10h real-world (better than Windows on same hardware)
+
+### Cons
+❌ Audio stack fragility (PipeWire transition period)  
+❌ Fractional scaling still imperfect for mixed DPI setups  
+❌ Thunderbolt dock lottery — "works on my machine" varies wildly  
+❌ Snap/ Flatpak / AppImage fragmentation  
+❌ No HDR, limited colour management  
+❌ Zoom/Teams screen sharing issues on Wayland (fixed late 2022)  
+❌ Fingerprint reader setup still requires CLI config  
+❌ Commercial software gaps (Adobe, MS Office native, some games)
+
+## Verdict
+
+**Ubuntu 20.04/22.04 on ThinkPad: 7.5/10 for developers, 5/10 for general use.**
+
+Would I do it again? **Yes, but with caveats:**
+- Use **Fedora** or **Pop!_OS** for newer kernels / better Nvidia / PipeWire out of the box
+- Stick to **LTS + HWE kernel** for stability
+- Budget 2-3 weekends for initial setup and "weird issue" debugging
+- Keep a Windows VM for the 5% of things that just won't work (Adobe, specific VPN clients, some hardware config tools)
+
+## What I.Run Now (2024)
+
+- **Personal**: macOS (M-series hardware, Unix + commercial app support)
+- **Work**: Ubuntu 22.04 on ThinkPad (company standard, Docker-heavy workload)
+- **Home server**: Debian stable (headless, boring, reliable)
+
+The year on Ubuntu made me a better engineer — I understand the stack below my code now. But for a friction-free daily driver where everything "just works" including HDR, colour management, and commercial apps, I'll take macOS on Apple Silicon.
+
+---
+
+*This post is part of my digital garden. It may be updated as my views evolve or new information surfaces.*

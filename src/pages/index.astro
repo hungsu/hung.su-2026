@@ -13,37 +13,138 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="intro">
+				<h1>Hung-Su</h1>
+				<p>
+					I&apos;m a UI engineer with 14 years of experience building web applications. Currently at <strong>CrowdStrike</strong> working with TypeScript and Ember.js. Previously at <strong>POLITICO</strong> and <strong>Birdsnest</strong>.
+				</p>
+				<p>
+					This is my digital garden — a collection of notes, articles, and explorations on topics I care about.
+				</p>
+			</section>
+
+			<section class="interests">
+				<h2>Interests</h2>
+				<ul>
+					<li><strong>Videogames</strong> — Playing, analysing, and occasionally building them</li>
+					<li><strong>PKM / Obsidian</strong> — Personal knowledge management, note-taking systems, and tools for thinking</li>
+					<li><strong>UI/UX</strong> — Design systems, accessibility, and crafting intuitive interfaces</li>
+					<li><strong>Typography</strong> — Type design, font selection, and readable web typography</li>
+					<li><strong>Privacy</strong> — Digital privacy, data ownership, and reducing surveillance</li>
+				</ul>
+			</section>
+
+			<section class="blog-table">
+				<h2>Recent Writing</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th>Title</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>April 26, 2026</td>
+							<td><a href="/blog/the-flaky-test/">CSS flexbox caused a stable test to fail 75% of the time (and every engineer didn&apos;t believe me)</a></td>
+						</tr>
+						<tr>
+							<td>TBD</td>
+							<td><a href="/blog/ubuntu-2020/">My Experience with Ubuntu in 2020</a></td>
+						</tr>
+						<tr>
+							<td>TBD</td>
+							<td><a href="/blog/home-theatre-journey/">Building a Home Theatre: Lessons from a Second-Hand Audio Journey</a></td>
+						</tr>
+					</tbody>
+				</table>
+				<p class="more-link"><a href="/blog/">View all posts →</a></p>
+			</section>
 		</main>
 		<Footer />
 	</body>
 </html>
+<style>
+	main {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 2rem 1rem;
+	}
+	.intro h1 {
+		font-size: 2.5rem;
+		margin-bottom: 1rem;
+	}
+	.intro p {
+		font-size: 1.125rem;
+		line-height: 1.7;
+		margin-bottom: 1rem;
+	}
+	.interests h2,
+	.blog-table h2 {
+		font-size: 1.5rem;
+		margin-top: 3rem;
+		margin-bottom: 1rem;
+		border-bottom: 2px solid var(--accent);
+		padding-bottom: 0.5rem;
+	}
+	.interests ul {
+		list-style: none;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1rem;
+	}
+	.interests li {
+		padding: 1rem;
+		background: var(--background-light-alternate);
+		border-radius: 8px;
+		line-height: 1.6;
+	}
+	.blog-table table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 1rem;
+	}
+	.blog-table th,
+	.blog-table td {
+		padding: 0.75rem 1rem;
+		text-align: left;
+		border-bottom: 1px solid var(--border-color);
+	}
+	.blog-table th {
+		font-weight: 600;
+		color: var(--gray-dark);
+	}
+	.blog-table td:first-child {
+		width: 150px;
+		color: var(--gray);
+		white-space: nowrap;
+	}
+	.blog-table a {
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.blog-table a:hover {
+		text-decoration: underline;
+	}
+	.more-link {
+		text-align: right;
+		margin-top: 1rem;
+	}
+	.more-link a {
+		color: var(--accent);
+		font-weight: 500;
+	}
+	@media (max-width: 720px) {
+		.intro h1 {
+			font-size: 2rem;
+		}
+		.interests ul {
+			grid-template-columns: 1fr;
+		}
+		.blog-table th,
+		.blog-table td {
+			padding: 0.5rem;
+		}
+	}
+</style>
