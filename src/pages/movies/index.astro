@@ -1,0 +1,129 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const movies = (await getCollection('movies')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="Movies" description="Movie reviews and thoughts" />
+		<style>
+			main {
+				width: 960px;
+			}
+			.movies-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+				gap: 2rem;
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+			}
+			.movie-card {
+				display: flex;
+				flex-direction: column;
+				transition: transform 0.2s ease;
+			}
+			.movie-card:hover {
+				transform: translateY(-4px);
+			}
+			.movie-poster {
+				position: relative;
+				width: 100%;
+				aspect-ratio: 2/3;
+				border-radius: 8px;
+				overflow: hidden;
+				background: var(--gray-light);
+			}
+			.movie-poster img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				transition: transform 0.3s ease;
+			}
+			.movie-card:hover .movie-poster img {
+				transform: scale(1.03);
+			}
+			.movie-info {
+				margin-top: 0.75rem;
+				text-align: center;
+			}
+			.movie-title {
+				margin: 0 0 0.25rem 0;
+				font-size: 1.1rem;
+				line-height: 1.3;
+				color: rgb(var(--black));
+			}
+			.movie-meta {
+				display: flex;
+				justify-content: center;
+				gap: 1rem;
+				font-size: 0.85rem;
+				color: var(--gray);
+				margin-bottom: 0.25rem;
+			}
+			.movie-rating {
+				color: #eab308;
+				font-weight: 600;
+			}
+			.movie-date {
+				color: var(--gray);
+				font-size: 0.8rem;
+			}
+			.movie-card a {
+				text-decoration: none;
+				color: inherit;
+			}
+			.movie-card a:hover .movie-title {
+				color: var(--accent);
+			}
+			@media (max-width: 720px) {
+				.movies-grid {
+					grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+					gap: 1.5rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section>
+				<h1 style="text-align: center; margin-bottom: 2rem;">Movie Reviews</h1>
+				<ul class="movies-grid">
+					{
+						movies.map((movie) => (
+							<li class="movie-card">
+								<a href={`/movies/${movie.id}/`}>
+									<div class="movie-poster">
+										{movie.data.heroImage && (
+											<Image width={400} height={600} src={movie.data.heroImage} alt={movie.data.title} />
+										)}
+									</div>
+									<div class="movie-info">
+										<h3 class="movie-title">{movie.data.title}</h3>
+										<div class="movie-meta">
+											{movie.data.year && <span>{movie.data.year}</span>}
+											{movie.data.rating && <span class="movie-rating">★ {movie.data.rating}/10</span>}
+										</div>
+										<p class="movie-date"><FormattedDate date={movie.data.pubDate} /></p>
+									</div>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

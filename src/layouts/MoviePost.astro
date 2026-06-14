@@ -1,0 +1,114 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+
+type Props = CollectionEntry<'movies'>['data'];
+
+const { title, description, pubDate, updatedDate, heroImage, year, rating, tmdbId } = Astro.props;
+const tmdbUrl = tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null;
+---
+
+<html lang="en">
+	<head>
+		<BaseHead title={title} description={description} />
+		<style>
+			.hero-image {
+				width: 100%;
+			}
+			.hero-image img {
+				display: block;
+				margin: 0 auto;
+				border-radius: 12px;
+				box-shadow: var(--box-shadow);
+			}
+			.prose {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 1em;
+				color: rgb(var(--gray-dark));
+			}
+			.title {
+				margin-bottom: 1em;
+				padding: 1em 0;
+				text-align: center;
+				line-height: 1;
+			}
+			.title h1 {
+				margin: 0 0 0.5em 0;
+			}
+			.movie-meta {
+				display: flex;
+				justify-content: center;
+				gap: 1.5rem;
+				margin-bottom: 1rem;
+				flex-wrap: wrap;
+				font-size: 0.9rem;
+				color: var(--gray);
+			}
+			.movie-meta-item {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+			}
+			.rating {
+				display: flex;
+				align-items: center;
+				gap: 0.3rem;
+				color: #eab308;
+				font-weight: 600;
+			}
+			.tmdb-link {
+				color: var(--accent);
+				text-decoration: none;
+				font-size: 0.85rem;
+			}
+			.tmdb-link:hover {
+				text-decoration: underline;
+			}
+			.mb05 {
+				margin-bottom: 0.5em;
+			}
+			.last-updated-on {
+				font-style: italic;
+			}
+		</style>
+	</head>
+
+	<body>
+		<Header />
+		<main>
+			<div class="hero-image full-bleed">
+				{heroImage && <Image width={1020} height={510} src={heroImage} alt={title} />}
+			</div>
+			<div class="full-bleed">
+				<div class="title">
+					<h1>{title}</h1>
+					<div class="movie-meta">
+						{year && <span class="movie-meta-item">{year}</span>}
+						{rating && <span class="movie-meta-item rating"><span>★</span> {rating}/10</span>}
+					</div>
+					<div>
+						<FormattedDate date={pubDate} />
+						{
+							updatedDate && (
+								<div class="last-updated-on">
+									Last updated on <FormattedDate date={updatedDate} />
+								</div>
+							)
+						}
+					</div>
+					<p>{description}</p>
+					{tmdbUrl && <p><a href={tmdbUrl} target="_blank" rel="noopener" class="tmdb-link">View on TMDb →</a></p>}
+					<hr />
+				</div>
+			</div>
+			<slot />
+		</main>
+		<Footer />
+	</body>
+</html>
