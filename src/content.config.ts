@@ -17,9 +17,9 @@ const blog = defineCollection({
 		}),
 });
 
-const movies = defineCollection({
-	// Load Markdown and MDX files in the `src/content/movies/` directory.
-	loader: glob({ base: './src/content/movies', pattern: '**/*.{md,mdx}' }),
+const reviews = defineCollection({
+	// Load Markdown and MDX files in the `src/content/reviews/` directory.
+	loader: glob({ base: './src/content/reviews', pattern: '**/*.{md,mdx}' }),
 	// Type-check frontmatter using a schema
 	schema: ({ image }) =>
 		z.object({
@@ -28,11 +28,11 @@ const movies = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
-			// Movie-specific fields
+			// Review-specific fields
 			year: z.number().optional(),
 			rating: z.number().min(0).max(10).optional(),
 			tmdbId: z.number().optional(),
 		}),
 });
 
-export const collections = { blog, movies };
+export const collections = { blog, reviews };

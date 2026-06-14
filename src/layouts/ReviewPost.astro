@@ -6,7 +6,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'movies'>['data'];
+type Props = CollectionEntry<'reviews'>['data'];
 
 const { title, description, pubDate, updatedDate, heroImage, year, rating, tmdbId } = Astro.props;
 const tmdbUrl = tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null;
