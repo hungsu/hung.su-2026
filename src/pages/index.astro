@@ -1,24 +1,419 @@
 ---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import MagazineFooter from '../components/MagazineFooter.astro';
+import MagazineMasthead from '../components/MagazineMasthead.astro';
+import MagazineNav from '../components/MagazineNav.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const reviews = (await getCollection('reviews')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const featured = reviews[0];
+const recentReviews = reviews.slice(0, 4);
+const recentPosts = posts.slice(0, 4);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--mag-bg: #0f1923;
+				--mag-bg-alt: #172231;
+				--mag-fg: #e8f0f0;
+				--mag-fg-muted: #7a9aaa;
+				--mag-accent: #00b4a6;
+				--mag-accent-light: #0a2028;
+				--mag-border: #1e3040;
+				--mag-font-display: 'Playfair Display', serif;
+				--mag-font-body: 'Source Sans 3', sans-serif;
+			}
+
+			html,
+			body {
+				background: var(--mag-bg);
+			}
+			body {
+				color: var(--mag-fg);
+				font-family: var(--mag-font-body);
+			}
+			body :global(a) {
+				font-family: inherit;
+				text-shadow: none;
+			}
+
+			/* ── FEATURED (hero review) ── */
+			.featured {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				min-height: 460px;
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.featured-image {
+				position: relative;
+				background: var(--mag-bg-alt);
+				overflow: hidden;
+			}
+			.featured-image :global(img),
+			.featured-image svg {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+			.featured-content {
+				padding: 3rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				border-left: 1px solid var(--mag-border);
+			}
+			.featured-kicker {
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: var(--mag-accent);
+				margin-bottom: 1rem;
+			}
+			.featured-title {
+				font-family: var(--mag-font-display);
+				font-size: clamp(2rem, 4vw, 3rem);
+				line-height: 1.1;
+				margin-bottom: 0.5rem;
+				color: var(--mag-fg);
+			}
+			.featured-rating {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				margin-bottom: 1rem;
+			}
+			.rating-score {
+				font-family: var(--mag-font-display);
+				font-size: 1.8rem;
+				font-weight: 700;
+				color: var(--mag-accent);
+			}
+			.rating-max {
+				font-size: 1rem;
+				color: var(--mag-fg-muted);
+				align-self: flex-end;
+				margin-bottom: 0.3rem;
+			}
+			.rating-bar {
+				flex: 1;
+				height: 4px;
+				background: var(--mag-border);
+				border-radius: 2px;
+			}
+			.rating-bar-fill {
+				height: 100%;
+				background: var(--mag-accent);
+				border-radius: 2px;
+			}
+			.featured-excerpt {
+				font-size: 1rem;
+				line-height: 1.7;
+				color: var(--mag-fg-muted);
+				margin-bottom: 1.5rem;
+			}
+			.read-review {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				color: var(--mag-accent);
+				text-decoration: none;
+				font-size: 0.85rem;
+				font-weight: 600;
+				align-self: flex-start;
+			}
+			.read-review:hover {
+				text-decoration: underline;
+			}
+			@media (max-width: 700px) {
+				.featured {
+					grid-template-columns: 1fr;
+					min-height: auto;
+				}
+				.featured-image {
+					height: 220px;
+				}
+				.featured-content {
+					padding: 1.5rem;
+					border-left: none;
+					border-top: 1px solid var(--mag-border);
+				}
+			}
+
+			/* ── CONTENT SECTIONS ── */
+			.content-wrap {
+				padding: 0 2rem;
+			}
+			.section {
+				padding: 3rem 0;
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.section:last-child {
+				border-bottom: none;
+			}
+			.section-label {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				margin-bottom: 2rem;
+			}
+			.section-label h2 {
+				font-family: var(--mag-font-display);
+				font-size: 1.4rem;
+				font-weight: 700;
+				color: var(--mag-fg);
+			}
+			.section-label::after {
+				content: '';
+				flex: 1;
+				height: 1px;
+				background: var(--mag-border);
+			}
+			.section-label a {
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--mag-accent);
+				text-decoration: none;
+				white-space: nowrap;
+			}
+
+			/* Review cards */
+			.card-row {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+				gap: 2rem;
+			}
+			.review-card {
+				text-decoration: none;
+				color: inherit;
+				display: block;
+			}
+			.review-card:hover .card-title {
+				color: var(--mag-accent);
+			}
+			.card-img {
+				aspect-ratio: 16/9;
+				background: var(--mag-bg-alt);
+				margin-bottom: 0.75rem;
+				overflow: hidden;
+			}
+			.card-img :global(img),
+			.card-img svg {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+			.card-kicker {
+				font-size: 0.68rem;
+				font-weight: 600;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--mag-accent);
+				margin-bottom: 0.25rem;
+			}
+			.card-title {
+				font-family: var(--mag-font-display);
+				font-size: 1.1rem;
+				line-height: 1.3;
+				margin-bottom: 0.35rem;
+				transition: color 0.2s;
+				color: var(--mag-fg);
+			}
+			.card-score {
+				font-size: 0.78rem;
+				color: var(--mag-fg-muted);
+			}
+			.card-score strong {
+				color: var(--mag-accent);
+			}
+
+			/* General posts */
+			.posts-columns {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+				gap: 1.5rem 2.5rem;
+			}
+			.post-item {
+				display: block;
+				border-top: 2px solid var(--mag-border);
+				padding-top: 1rem;
+				text-decoration: none;
+				color: inherit;
+			}
+			.post-item:hover .post-title {
+				color: var(--mag-accent);
+			}
+			.post-title {
+				font-family: var(--mag-font-display);
+				font-size: 1.05rem;
+				line-height: 1.35;
+				margin-bottom: 0.4rem;
+				transition: color 0.2s;
+				color: var(--mag-fg);
+			}
+			.post-date {
+				font-size: 0.72rem;
+				color: var(--mag-fg-muted);
+			}
+
+			/* ── SMALL SCREENS (must come last: overrides the 700px rules above) ── */
+			@media (max-width: 480px) {
+				.content-wrap {
+					padding: 0 1rem;
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<Header />
+		<MagazineMasthead />
+		<MagazineNav />
+
 		<main>
-			<h1>Hi, I'm Hung-Su</h1>
-			<p>This is my personal site, where I write about software engineering and other things I'm thinking about.</p>
-			<p>
-				Take a look at my <a href="/blog">blog</a> or read more <a href="/about">about me</a>.
-			</p>
+			{
+				featured && (
+					<section class="featured full-bleed">
+						<div class="featured-image">
+							{featured.data.heroImage ? (
+								<Image
+									width={600}
+									height={460}
+									src={featured.data.heroImage}
+									alt={featured.data.title}
+								/>
+							) : (
+								<svg viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+									<rect width="600" height="460" fill="#172231" />
+									<text
+										x="300"
+										y="230"
+										dominant-baseline="middle"
+										text-anchor="middle"
+										font-family="Playfair Display, serif"
+										font-size="36"
+										fill="#00b4a6"
+										opacity="0.4"
+										font-weight="700"
+									>
+										{featured.data.title}
+									</text>
+								</svg>
+							)}
+						</div>
+						<div class="featured-content">
+							<div class="featured-kicker">
+								★ Featured Review{featured.data.year && ` · Film ${featured.data.year}`}
+							</div>
+							<h1 class="featured-title">{featured.data.title}</h1>
+							{featured.data.rating != null && (
+								<div class="featured-rating">
+									<div class="rating-score">{featured.data.rating.toFixed(1)}</div>
+									<div class="rating-max">/10</div>
+									<div class="rating-bar">
+										<div class="rating-bar-fill" style={`width:${featured.data.rating * 10}%`} />
+									</div>
+								</div>
+							)}
+							<p class="featured-excerpt">{featured.data.description}</p>
+							<a href={`/reviews/${featured.id}/`} class="read-review">
+								Read the full review →
+							</a>
+						</div>
+					</section>
+				)
+			}
+
+			<div class="content-wrap wide">
+				{
+					recentReviews.length > 0 && (
+						<section class="section">
+							<div class="section-label">
+								<h2>Recent Film Reviews</h2>
+								<a href="/reviews">See all →</a>
+							</div>
+							<div class="card-row">
+								{recentReviews.map((review) => (
+									<a href={`/reviews/${review.id}/`} class="review-card">
+										<div class="card-img">
+											{review.data.heroImage ? (
+												<Image width={320} height={180} src={review.data.heroImage} alt={review.data.title} />
+											) : (
+												<svg viewBox="0 0 16 9" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+													<rect width="16" height="9" fill="#172231" />
+													<text
+														x="8"
+														y="4.5"
+														dominant-baseline="middle"
+														text-anchor="middle"
+														font-family="Playfair Display"
+														font-size="1.4"
+														fill="#00b4a6"
+														opacity="0.4"
+													>
+														{review.data.title}
+													</text>
+												</svg>
+											)}
+										</div>
+										{review.data.year && <div class="card-kicker">{review.data.year}</div>}
+										<div class="card-title">{review.data.title}</div>
+										{review.data.rating != null && (
+											<div class="card-score">
+												Score: <strong>{review.data.rating.toFixed(1)}/10</strong>
+											</div>
+										)}
+									</a>
+								))}
+							</div>
+						</section>
+					)
+				}
+
+				{
+					recentPosts.length > 0 && (
+						<section class="section">
+							<div class="section-label">
+								<h2>Opinion & Writing</h2>
+								<a href="/blog">See all →</a>
+							</div>
+							<div class="posts-columns">
+								{recentPosts.map((post) => (
+									<a href={`/blog/${post.id}/`} class="post-item">
+										<div class="post-title">{post.data.title}</div>
+										<div class="post-date">
+											<FormattedDate date={post.data.pubDate} />
+										</div>
+									</a>
+								))}
+							</div>
+						</section>
+					)
+				}
+			</div>
 		</main>
-		<Footer />
+
+		<MagazineFooter />
 	</body>
 </html>
