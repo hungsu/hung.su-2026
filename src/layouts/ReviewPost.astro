@@ -1,114 +1,428 @@
 ---
-import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import BaseHead from "../components/BaseHead.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import MagazineFooter from "../components/MagazineFooter.astro";
 
-type Props = CollectionEntry<'reviews'>['data'];
+type Props = CollectionEntry<"reviews">["data"];
 
-const { title, description, pubDate, updatedDate, heroImage, year, rating, tmdbId } = Astro.props;
+const {
+    title,
+    description,
+    pubDate,
+    updatedDate,
+    heroImage,
+    year,
+    rating,
+    tmdbId,
+    verdict,
+} = Astro.props;
 const tmdbUrl = tmdbId ? `https://www.themoviedb.org/movie/${tmdbId}` : null;
+const stars = rating != null ? Math.round((rating / 10) * 5) : null;
 ---
 
 <html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.movie-meta {
-				display: flex;
-				justify-content: center;
-				gap: 1.5rem;
-				margin-bottom: 1rem;
-				flex-wrap: wrap;
-				font-size: 0.9rem;
-				color: var(--gray);
-			}
-			.movie-meta-item {
-				display: flex;
-				align-items: center;
-				gap: 0.4rem;
-			}
-			.rating {
-				display: flex;
-				align-items: center;
-				gap: 0.3rem;
-				color: #eab308;
-				font-weight: 600;
-			}
-			.tmdb-link {
-				color: var(--accent);
-				text-decoration: none;
-				font-size: 0.85rem;
-			}
-			.tmdb-link:hover {
-				text-decoration: underline;
-			}
-			.mb05 {
-				margin-bottom: 0.5em;
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
+    <head>
+        <BaseHead title={title} description={description} />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --mag-bg: #0f1923;
+                --mag-bg-alt: #172231;
+                --mag-fg: #e8f0f0;
+                --mag-fg-muted: #7a9aaa;
+                --mag-accent: #00b4a6;
+                --mag-accent-light: #0d1c28;
+                --mag-border: #1e3040;
+                --mag-font-display: "Playfair Display", serif;
+                --mag-font-body: "Source Sans 3", sans-serif;
+            }
 
-	<body>
-		<Header />
-		<main>
-			<div class="hero-image full-bleed">
-				{heroImage && <Image width={1020} height={510} src={heroImage} alt={title} />}
-			</div>
-			<div class="full-bleed">
-				<div class="title">
-					<h1>{title}</h1>
-					<div class="movie-meta">
-						{year && <span class="movie-meta-item">{year}</span>}
-						{rating && <span class="movie-meta-item rating"><span>★</span> {rating}/10</span>}
-					</div>
-					<div>
-						<FormattedDate date={pubDate} />
-						{
-							updatedDate && (
-								<div class="last-updated-on">
-									Last updated on <FormattedDate date={updatedDate} />
-								</div>
-							)
-						}
-					</div>
-					<p>{description}</p>
-					{tmdbUrl && <p><a href={tmdbUrl} target="_blank" rel="noopener" class="tmdb-link">View on TMDb →</a></p>}
-					<hr />
-				</div>
-			</div>
-			<slot />
-		</main>
-		<Footer />
-	</body>
+            html,
+            body {
+                background: var(--mag-bg);
+            }
+            body {
+                color: var(--mag-fg);
+                font-family: var(--mag-font-body);
+                line-height: 1.7;
+            }
+            body :global(a) {
+                font-family: inherit;
+                text-shadow: none;
+            }
+
+            /* ── SLIM NAV ── */
+            .site-nav-slim {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1.25rem 2.5rem;
+                border-bottom: 1px solid var(--mag-border);
+            }
+            .site-name {
+                font-family: var(--mag-font-display);
+                font-size: 1.5rem;
+                text-decoration: none;
+                color: var(--mag-fg);
+            }
+            .site-name em {
+                color: var(--mag-accent);
+                font-style: normal;
+            }
+            .nav-links {
+                display: flex;
+                gap: 1.75rem;
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            .nav-links a {
+                font-size: 0.78rem;
+                font-weight: 600;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                text-decoration: none;
+                color: var(--mag-fg-muted);
+            }
+            .nav-links a:hover,
+            .nav-links a.active {
+                color: var(--mag-accent);
+            }
+
+            /* ── PAGE: poster column + reading column ── */
+            .page {
+                display: grid;
+                grid-template-columns: 320px 1fr;
+            }
+
+            /* ── POSTER COLUMN (left, sticky) ── */
+            .poster-col {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                background: var(--mag-bg-alt);
+                border-right: 1px solid var(--mag-border);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 2rem;
+            }
+            .poster-frame {
+                width: 260px;
+                aspect-ratio: 2/3;
+                box-shadow:
+                    0 20px 60px rgba(0, 0, 0, 0.5),
+                    0 0 0 1px rgba(0, 180, 166, 0.15);
+                margin-bottom: 1.5rem;
+                overflow: hidden;
+            }
+            .poster-frame :global(img),
+            .poster-frame svg {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+            .poster-stats {
+                width: 100%;
+                max-width: 260px;
+            }
+            .poster-stat {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.4rem 0;
+                font-size: 0.78rem;
+                border-bottom: 1px solid var(--mag-border);
+            }
+            .poster-stat:last-child {
+                border-bottom: none;
+            }
+            .poster-stat-label {
+                color: var(--mag-fg-muted);
+                font-weight: 300;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .poster-stat-value {
+                color: var(--mag-fg);
+                font-weight: 600;
+            }
+            .poster-stat-value a {
+                color: var(--mag-accent);
+            }
+            .poster-stat-verdict {
+                margin-top: 0.25rem;
+                padding-top: 0.6rem;
+            }
+            .verdict-pill {
+                display: inline-block;
+                background: var(--mag-accent);
+                color: var(--mag-bg);
+                font-size: 0.62rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                padding: 0.2rem 0.55rem;
+                border-radius: 999px;
+            }
+
+            /* ── CONTENT COLUMN (right) ── */
+            .content-col {
+                border-left: 1px solid var(--mag-border);
+            }
+            .article-header {
+                padding: 3rem 3rem 2rem;
+                border-bottom: 1px solid var(--mag-border);
+            }
+            .article-kicker {
+                font-size: 0.72rem;
+                font-weight: 600;
+                letter-spacing: 0.2em;
+                text-transform: uppercase;
+                color: var(--mag-accent);
+                margin-bottom: 0.75rem;
+            }
+            .article-title {
+                font-family: var(--mag-font-display);
+                font-size: clamp(2.5rem, 5vw, 4rem);
+                line-height: 1;
+                font-weight: 900;
+                margin-bottom: 0.5rem;
+                color: var(--mag-fg);
+            }
+            .article-subtitle {
+                font-family: var(--mag-font-display);
+                font-style: italic;
+                font-size: 1.15rem;
+                color: var(--mag-fg-muted);
+                margin-bottom: 1.5rem;
+            }
+            .article-meta {
+                display: flex;
+                gap: 2rem;
+                flex-wrap: wrap;
+                font-size: 0.78rem;
+                color: var(--mag-fg-muted);
+            }
+            .article-meta a {
+                color: var(--mag-accent);
+            }
+
+            .review-text {
+                padding: 2.5rem 3rem 4rem;
+                max-width: 64ch;
+            }
+            .review-text :global(p) {
+                font-size: 1.05rem;
+                line-height: 1.85;
+                margin-bottom: 1.5rem;
+                color: #c8d8d8;
+            }
+            .review-text :global(p:first-of-type::first-letter) {
+                font-family: var(--mag-font-display);
+                font-size: 4.5rem;
+                float: left;
+                line-height: 0.8;
+                padding-right: 0.5rem;
+                padding-top: 0.15rem;
+                color: var(--mag-accent);
+                font-weight: 900;
+            }
+            .review-text :global(h2) {
+                font-family: var(--mag-font-display);
+                font-size: 1.6rem;
+                font-weight: 700;
+                margin: 2.5rem 0 1rem;
+                color: var(--mag-fg);
+            }
+            .review-text :global(blockquote) {
+                border-left: 3px solid var(--mag-accent);
+                padding: 1rem 1.5rem;
+                background: var(--mag-accent-light);
+                font-family: var(--mag-font-display);
+                font-size: 1.25rem;
+                font-style: italic;
+                line-height: 1.4;
+                margin: 0 0 1.5rem;
+            }
+            .review-text :global(img) {
+                width: 100%;
+                border-radius: 4px;
+            }
+            .review-text :global(a) {
+                color: var(--mag-accent);
+            }
+
+            /* ── RESPONSIVE ── */
+            @media (max-width: 700px) {
+                .page {
+                    grid-template-columns: 1fr;
+                }
+                .poster-col {
+                    position: relative;
+                    height: auto;
+                    padding: 1.5rem;
+                    flex-direction: row;
+                    gap: 1.25rem;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    justify-content: center;
+                    border-right: none;
+                    border-bottom: 1px solid var(--mag-border);
+                }
+                .poster-frame {
+                    width: 140px;
+                    margin-bottom: 0;
+                }
+                .poster-stats {
+                    max-width: 180px;
+                }
+                .content-col {
+                    border-left: none;
+                }
+                .article-header {
+                    padding: 2rem 1.5rem 1.5rem;
+                }
+                .review-text {
+                    padding: 2rem 1.5rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="site-nav-slim">
+            <a href="/" class="site-name">hung<em>.</em>su</a>
+            <ul class="nav-links">
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/reviews" class="active">Reviews</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <div class="page full-bleed">
+                <aside class="poster-col">
+                    <div class="poster-frame">
+                        {
+                            heroImage ? (
+                                <Image
+                                    width={400}
+                                    height={600}
+                                    src={heroImage}
+                                    alt={title}
+                                />
+                            ) : (
+                                <svg
+                                    viewBox="0 0 2 3"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    preserveAspectRatio="xMidYMid slice"
+                                >
+                                    <rect width="2" height="3" fill="#0d1c28" />
+                                    <text
+                                        x="1"
+                                        y="1.5"
+                                        dominant-baseline="middle"
+                                        text-anchor="middle"
+                                        font-family="Playfair Display"
+                                        font-size="0.16"
+                                        fill="#00b4a6"
+                                        opacity="0.5"
+                                        font-weight="900"
+                                    >
+                                        {title}
+                                    </text>
+                                </svg>
+                            )
+                        }
+                    </div>
+                    <div class="poster-stats">
+                        {
+                            stars != null && (
+                                <div class="poster-stat">
+                                    <span class="poster-stat-label">
+                                        Rating
+                                    </span>
+                                    <span class="poster-stat-value">
+                                        {"★".repeat(stars) + "☆".repeat(5 - stars)}
+                                    </span>
+                                </div>
+                            )
+                        }
+                        {
+                            year && (
+                                <div class="poster-stat">
+                                    <span class="poster-stat-label">Year</span>
+                                    <span class="poster-stat-value">
+                                        {year}
+                                    </span>
+                                </div>
+                            )
+                        }
+                        {
+                            tmdbUrl && (
+                                <div class="poster-stat">
+                                    <span class="poster-stat-label">TMDb</span>
+                                    <span class="poster-stat-value">
+                                        <a
+                                            href={tmdbUrl}
+                                            target="_blank"
+                                            rel="noopener"
+                                        >
+                                            View →
+                                        </a>
+                                    </span>
+                                </div>
+                            )
+                        }
+                        {
+                            verdict && (
+                                <div class="poster-stat poster-stat-verdict">
+                                    <span class="poster-stat-label">
+                                        Verdict
+                                    </span>
+                                    <span class="verdict-pill">{verdict}</span>
+                                </div>
+                            )
+                        }
+                    </div>
+                </aside>
+
+                <div class="content-col">
+                    <header class="article-header">
+                        <div class="article-kicker">Film Review</div>
+                        <h1 class="article-title">{title}</h1>
+                        <p class="article-subtitle">{description}</p>
+                        <div class="article-meta">
+                            <span>
+                                <FormattedDate date={pubDate} />
+                            </span>
+                            {
+                                updatedDate && (
+                                    <span>
+                                        Updated{" "}
+                                        <FormattedDate date={updatedDate} />
+                                    </span>
+                                )
+                            }
+                        </div>
+                    </header>
+
+                    <article class="review-text">
+                        <slot />
+                    </article>
+                </div>
+            </div>
+        </main>
+
+        <MagazineFooter />
+    </body>
 </html>

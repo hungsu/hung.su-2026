@@ -32,6 +32,8 @@ const reviews = defineCollection({
 			year: z.number().optional(),
 			rating: z.number().min(0).max(10).optional(),
 			tmdbId: z.number().optional(),
+			// A short personal one-line reaction, shown as a pill (e.g. "I have rewatched")
+			verdict: z.string().optional(),
 		}),
 });
 
