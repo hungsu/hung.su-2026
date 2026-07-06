@@ -28,6 +28,7 @@ const reviews = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
+			backgroundImage: z.optional(image()),
 			// Review-specific fields
 			year: z.number().optional(),
 			rating: z.number().min(0).max(10).optional(),
