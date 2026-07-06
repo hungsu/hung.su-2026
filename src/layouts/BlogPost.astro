@@ -2,9 +2,9 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import Header from '../components/Header.astro';
+import MagazineFooter from '../components/MagazineFooter.astro';
+import MagazineSiteNav from '../components/MagazineSiteNav.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
@@ -14,68 +14,222 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Sans+3:wght@300;400;600&display=swap"
+			rel="stylesheet"
+		/>
 		<style>
+			:root {
+				--mag-bg: #0f1923;
+				--mag-bg-alt: #172231;
+				--mag-fg: #e8f0f0;
+				--mag-fg-muted: #7a9aaa;
+				--mag-accent: #00b4a6;
+				--mag-accent-light: #0a2028;
+				--mag-border: #1e3040;
+				--mag-font-display: 'Playfair Display', serif;
+				--mag-font-body: 'Source Sans 3', sans-serif;
+			}
+
+			html,
+			body {
+				background: var(--mag-bg);
+			}
+			body {
+				color: var(--mag-fg);
+				font-family: var(--mag-font-body);
+				line-height: 1.7;
+			}
+			body :global(a) {
+				font-family: inherit;
+				text-shadow: none;
+			}
+
+			/* ── HERO BANNER ── */
 			.hero-image {
+				background: var(--mag-bg-alt);
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.hero-image :global(img) {
 				width: 100%;
-			}
-			.hero-image img {
+				height: auto;
 				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
 			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
+
+			/* ── ARTICLE HEADER ── */
+			.article-header {
+				padding: 3rem 0 1.5rem;
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
+			.article-kicker {
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+				color: var(--mag-accent);
+				margin-bottom: 0.75rem;
 			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
+			.article-title {
+				font-family: var(--mag-font-display);
+				font-size: clamp(2rem, 4vw, 3rem);
+				font-weight: 900;
+				line-height: 1.05;
+				margin-bottom: 0.5rem;
+				color: var(--mag-fg);
 			}
-			.mb05 {
-				margin-bottom: 0.5em;
+			.article-meta {
+				display: flex;
+				gap: 1.5rem;
+				flex-wrap: wrap;
+				font-size: 0.78rem;
+				color: var(--mag-fg-muted);
 			}
-			.last-updated-on {
+
+			/* ── BODY CONTENT ── */
+			.article-body {
+				padding: 2rem 0 3rem;
+			}
+			.article-body :global(p) {
+				font-size: 1.05rem;
+				line-height: 1.85;
+				margin-bottom: 1.5rem;
+				color: #c8d8d8;
+			}
+			.article-body :global(h2) {
+				font-family: var(--mag-font-display);
+				font-size: 1.6rem;
+				font-weight: 700;
+				margin: 2.5rem 0 1rem;
+				color: var(--mag-fg);
+			}
+			.article-body :global(h3) {
+				font-family: var(--mag-font-display);
+				font-size: 1.2rem;
+				font-weight: 700;
+				margin: 2rem 0 0.75rem;
+				color: var(--mag-fg);
+			}
+			.article-body :global(ul),
+			.article-body :global(ol) {
+				margin: 0 0 1.5rem 1.25rem;
+				color: #c8d8d8;
+			}
+			.article-body :global(li) {
+				margin-bottom: 0.5rem;
+			}
+			.article-body :global(a) {
+				color: var(--mag-accent);
+			}
+			.article-body :global(img) {
+				border-radius: 4px;
+			}
+			.article-body :global(code) {
+				background-color: var(--mag-bg-alt);
+				color: var(--mag-fg);
+			}
+			.article-body :global(.wide pre code) {
+				background-color: transparent;
+				padding: 0;
+			}
+
+			/* ── WIDE ELEMENTS (code, tables, figures) ── */
+			.article-body :global(.wide pre) {
+				background: var(--mag-bg-alt);
+				border: 1px solid var(--mag-border);
+				padding: 1.25rem 1.5rem;
+				overflow-x: auto;
+				font-family: 'SF Mono', Monaco, monospace;
+				font-size: 0.85rem;
+				line-height: 1.6;
+				color: #c8d8d8;
+				border-radius: 4px;
+			}
+			.article-body :global(.wide table) {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.9rem;
+			}
+			.article-body :global(.wide th),
+			.article-body :global(.wide td) {
+				padding: 0.6rem 0.75rem;
+				text-align: left;
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.article-body :global(.wide th) {
+				font-size: 0.72rem;
+				font-weight: 600;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				color: var(--mag-fg-muted);
+				background: var(--mag-bg-alt);
+			}
+			.article-body :global(.wide td) {
+				color: #c8d8d8;
+			}
+			.article-body :global(.wide figure) {
+				margin: 0;
+				padding: 0;
+			}
+			.article-body :global(.wide figure img),
+			.article-body :global(.wide figure svg) {
+				width: 100%;
+				height: auto;
+				display: block;
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.article-body :global(.wide figcaption) {
+				padding: 0.75rem 0;
+				font-size: 0.78rem;
+				color: var(--mag-fg-muted);
 				font-style: italic;
+			}
+
+			.article-body :global(blockquote) {
+				border-left: 3px solid var(--mag-accent);
+				padding: 1rem 1.5rem;
+				background: var(--mag-accent-light);
+				color: var(--mag-fg);
+				font-family: var(--mag-font-display);
+				font-size: 1.25rem;
+				font-style: italic;
+				line-height: 1.4;
+				margin: 0 0 1.5rem;
 			}
 		</style>
 	</head>
-
 	<body>
-		<Header />
-		<main>
-			<!-- <article> -->
+		<MagazineSiteNav active="blog" />
+
+		<header class="article-header">
+			<div class="article-kicker">Essay</div>
+			<h1 class="article-title">{title}</h1>
+			<div class="article-meta">
+				<span>
+					<FormattedDate date={pubDate} />
+				</span>
+				{
+					updatedDate && (
+						<span>
+							Updated <FormattedDate date={updatedDate} />
+						</span>
+					)
+				}
+			</div>
+		</header>
+
+		{
+			heroImage && (
 				<div class="hero-image full-bleed">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+					<Image width={1200} height={520} src={heroImage} alt="" />
 				</div>
-				<div class="full-bleed">
-					<div class="title">
-						<h1>{title}</h1>
-						<div>
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<p>{description}</p>
-						<hr />
-					</div>
-				</div>
-				<slot />
-			<!-- </article> -->
-		</main>
-		<Footer />
+			)
+		}
+
+		<article class="article-body">
+			<slot />
+		</article>
+
+		<MagazineFooter />
 	</body>
 </html>
