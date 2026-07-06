@@ -296,11 +296,11 @@ const recentPosts = posts.slice(0, 4);
 				featured && (
 					<section class="featured full-bleed">
 						<div class="featured-image">
-							{featured.data.heroImage ? (
+							{featured.data.backgroundImage ? (
 								<Image
 									width={600}
 									height={460}
-									src={featured.data.heroImage}
+									src={featured.data.backgroundImage}
 									alt={featured.data.title}
 								/>
 							) : (
@@ -357,8 +357,16 @@ const recentPosts = posts.slice(0, 4);
 								{recentReviews.map((review) => (
 									<a href={`/reviews/${review.id}/`} class="review-card">
 										<div class="card-img">
-											{review.data.heroImage ? (
-												<Image width={320} height={180} src={review.data.heroImage} alt={review.data.title} />
+											{review.data.backgroundImage ? (
+												<Image
+													width={320}
+													height={180}
+													src={
+														review.data
+															.backgroundImage
+													}
+													alt={review.data.title}
+												/>
 											) : (
 												<svg viewBox="0 0 16 9" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
 													<rect width="16" height="9" fill="#172231" />
