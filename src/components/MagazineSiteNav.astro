@@ -1,0 +1,61 @@
+---
+interface Props {
+	active: 'blog' | 'reviews' | 'about';
+}
+
+const { active } = Astro.props;
+---
+
+<nav class="site-nav-slim">
+	<a href="/" class="site-name">hung<em>.</em>su</a>
+	<ul class="nav-links">
+		<li><a href="/blog" class={active === 'blog' ? 'active' : undefined}>Blog</a></li>
+		<li><a href="/reviews" class={active === 'reviews' ? 'active' : undefined}>Reviews</a></li>
+		<li><a href="/about" class={active === 'about' ? 'active' : undefined}>About</a></li>
+	</ul>
+</nav>
+
+<style>
+	.site-nav-slim {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.25rem 2.5rem;
+		border-bottom: 1px solid var(--mag-border);
+	}
+	.site-name {
+		font-family: var(--mag-font-display);
+		font-size: 1.5rem;
+		text-decoration: none;
+		color: var(--mag-fg);
+	}
+	.site-name em {
+		color: var(--mag-accent);
+		font-style: normal;
+	}
+	.nav-links {
+		display: flex;
+		gap: 1.75rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.nav-links a {
+		font-size: 0.78rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: var(--mag-fg-muted);
+	}
+	.nav-links a:hover,
+	.nav-links a.active {
+		color: var(--mag-accent);
+	}
+
+	@media (max-width: 480px) {
+		.nav-links {
+			display: none;
+		}
+	}
+</style>
