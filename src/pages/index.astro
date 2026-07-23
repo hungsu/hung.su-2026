@@ -4,8 +4,7 @@ import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import MagazineFooter from '../components/MagazineFooter.astro';
-import MagazineMasthead from '../components/MagazineMasthead.astro';
-import MagazineNav from '../components/MagazineNav.astro';
+import MagazineSiteNav from '../components/MagazineSiteNav.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const reviews = (await getCollection('reviews')).sort(
@@ -288,8 +287,7 @@ const recentPosts = posts.slice(0, 4);
 		</style>
 	</head>
 	<body>
-		<MagazineMasthead />
-		<MagazineNav />
+		<MagazineSiteNav />
 
 		<main>
 			{
