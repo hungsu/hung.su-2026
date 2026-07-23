@@ -2,9 +2,9 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
+import MagazineSiteNav from '../../components/MagazineSiteNav.astro';
+import MagazineFooter from '../../components/MagazineFooter.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
@@ -16,99 +16,145 @@ const posts = (await getCollection('blog')).sort(
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600&display=swap"
+			rel="stylesheet"
+		/>
 		<style>
-			main {
-				width: 960px;
+			:root {
+				--mag-bg: #0f1923;
+				--mag-bg-alt: #172231;
+				--mag-fg: #e8f0f0;
+				--mag-fg-muted: #7a9aaa;
+				--mag-accent: #00b4a6;
+				--mag-accent-light: #0a2028;
+				--mag-border: #1e3040;
+				--mag-font-display: 'Playfair Display', serif;
+				--mag-font-body: 'Source Sans 3', sans-serif;
 			}
-			ul {
+
+			html,
+			body {
+				background: var(--mag-bg);
+			}
+			body {
+				color: var(--mag-fg);
+				font-family: var(--mag-font-body);
+			}
+			body :global(a) {
+				font-family: inherit;
+				text-shadow: none;
+			}
+
+			.content-wrap {
+				padding: 0 2rem;
+			}
+			.section {
+				padding: 3rem 0;
+				border-bottom: 1px solid var(--mag-border);
+			}
+			.section:last-child {
+				border-bottom: none;
+			}
+			.section-label {
 				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
+				align-items: center;
+				gap: 1rem;
+				margin-bottom: 2rem;
+			}
+			.section-label h2 {
+				font-family: var(--mag-font-display);
+				font-size: 1.4rem;
+				font-weight: 700;
+				color: var(--mag-fg);
+			}
+			.section-label::after {
+				content: '';
+				flex: 1;
+				height: 1px;
+				background: var(--mag-border);
+			}
+
+			.posts-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+				gap: 1.5rem 2.5rem;
+			}
+			.post-item {
+				display: block;
+				border-top: 2px solid var(--mag-border);
+				padding-top: 1rem;
+				text-decoration: none;
+				color: inherit;
+			}
+			.post-item:hover .post-title {
+				color: var(--mag-accent);
+			}
+			.post-title {
+				font-family: var(--mag-font-display);
+				font-size: 1.05rem;
+				line-height: 1.35;
+				margin-bottom: 0.4rem;
+				transition: color 0.2s;
+				color: var(--mag-fg);
+			}
+			.post-date {
+				font-size: 0.72rem;
+				color: var(--mag-fg-muted);
+			}
+
+			main {
 				margin: 0;
 				padding: 0;
+				display: grid;
+				grid-template-columns: [full-start] minmax(1rem, 1fr) [wide-start] minmax(0, 15ch) [content-start] minmax(0, 60ch) [content-end] minmax(0, 15ch) [wide-end] minmax(1rem, 1fr) [full-end];
 			}
-			ul li {
-				width: calc(50% - 1rem);
+			main > * {
+				grid-column: full-start / full-end;
+				display: grid;
+				grid-template-columns: [full-start] minmax(1rem, 1fr) [wide-start] minmax(0, 15ch) [content-start] minmax(0, 60ch) [content-end] minmax(0, 15ch) [wide-end] minmax(1rem, 1fr) [full-end];
 			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
+			main > * > * {
+				grid-column: content-start / content-end;
 			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
+
+			@media (max-width: 480px) {
+				.content-wrap {
+					padding: 0 1rem;
 				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
+				.posts-grid {
+					grid-template-columns: 1fr;
 				}
 			}
 		</style>
 	</head>
 	<body>
-		<Header />
+		<MagazineSiteNav active="blog" />
+
 		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
+			<div class="content-wrap wide">
+				<section class="section">
+					<div class="section-label">
+						<h2>Opinion & Writing</h2>
+					</div>
+					<div class="posts-grid">
+						{
+							posts.map((post) => (
+								<a href={`/blog/${post.id}/`} class="post-item">
+									<div class="post-title">{post.data.title}</div>
+									<div class="post-date">
 										<FormattedDate date={post.data.pubDate} />
-									</p>
+									</div>
 								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
+							))
+						}
+					</div>
+				</section>
+			</div>
 		</main>
-		<Footer />
+
+		<MagazineFooter />
 	</body>
 </html>
